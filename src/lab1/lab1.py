@@ -5,6 +5,7 @@ import socketio
 import eventlet
 from flask import Flask
 import autodrive
+import math
 
 ################################################################################
 
@@ -24,17 +25,43 @@ app = Flask(__name__)  # '__main__'
 def connect(sid, environ):
     print("Connected!")
 
+RADIANS_PER_ENTRY = .004
+
+def dist(a, b, theta):
+    alpha = math.atan((a * math.cos(theta)  - b)/ (a * math.sin(theta)))
+    distance = b * math.sin(alpha)
+    return distance
+
+last_dif = 0
+p = .45
+d = .01
+
+def determineTurn(lidar_data):
+    global last_dif
+    
+    try :
+        right_dist = dist(lidar_data[280], lidar_data[200], 20 * RADIANS_PER_ENTRY)
+        left_dist = dist(lidar_data[800], lidar_data[880], 20 * RADIANS_PER_ENTRY)
+        print(left_dist, right_dist, left_dist - right_dist)    
+        k = left_dist - right_dist
+        der = k - last_dif
+        decision = p*k + d*der
+        last_dif = k 
+    except:
+        decision = 0
+    return decision
 
 # Registering "Bridge" event handler for the server
 @sio.on("Bridge")
 def bridge(sid, data):
     if data:
         # Vehicle data
-        f1tenth_1.parse_data(data)
+        f1tenth_1.parse_data(data, True)
 
         # Vehicle control
-        f1tenth_1.throttle_command = 0.2  # [-1, 1]
-        f1tenth_1.steering_command = 0.0  # generate your steering command
+        f1tenth_1.throttle_command = 0.25  # [-1, 1]
+        f1tenth_1.steering_command = determineTurn(f1tenth_1.lidar_range_array)  # generate your steering command 
+
 
         ########################################################################
 
