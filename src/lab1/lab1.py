@@ -59,7 +59,7 @@ def bridge(sid, data):
         f1tenth_1.parse_data(data, True)
 
         # Vehicle control
-        f1tenth_1.throttle_command = 0.25  # [-1, 1]
+        f1tenth_1.throttle_command = 0.23  # [-1, 1]
         f1tenth_1.steering_command = determineTurn(f1tenth_1.lidar_range_array)  # generate your steering command 
 
 
