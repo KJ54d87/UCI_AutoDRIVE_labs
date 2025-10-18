@@ -35,7 +35,7 @@ def dist(a, b, theta):
 
 last_dif = 0
 p = .5
-d = .17
+d = .15
 
 def determineTurn(lidar_data):
     global last_dif
@@ -46,6 +46,8 @@ def determineTurn(lidar_data):
         print(left_dist, right_dist, left_dist - right_dist)    
         k = left_dist - right_dist
         der = k - last_dif
+        if der > .2 :
+            der = 0
         decision = p*k + d*der
         last_dif = k 
     except Exception:
@@ -71,7 +73,7 @@ def determineThrottle(steering):
 def crash(f1tenth):
     if (f1tenth.lidar_range_array[540] < .5):
         f1tenth.throttle_command = -.1
-        f1tenth.steering_command = 10
+        f1tenth.steering_command = 4
 
 
 # Registering "Bridge" event handler for the server
